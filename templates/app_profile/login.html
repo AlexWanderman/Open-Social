@@ -13,11 +13,14 @@
         const result = await exchange_json(url, data)
 
         if ('error' in result) {
+            console.log(result)
             alert(result['error'])
             return
         }
 
-        console.log(result)
+        if (result['result'] == 'ok') {
+            window.location.assign('{% url "profile" %}')
+        }
     }
 </script>
 <title>Вход</title>

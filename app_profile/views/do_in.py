@@ -20,4 +20,4 @@ def do_in(request):
         auth.login(request, aut)
         return JsonResponse({'result': 'ok'})
 
-    return JsonResponse({'result': 'error'})
+    return JsonResponse({'error': 'login attempt faild'})

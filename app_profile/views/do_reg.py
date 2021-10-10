@@ -26,21 +26,21 @@ def do_reg(request):
     # 3 Проверка данных
     if not re.match(r'[a-zA-Z0-9]{3,33}', username):
         print(f'Not match: {username}')
-        return JsonResponse({'result': 'input_error'})
+        return JsonResponse({'error': 'input_error'})
 
     # Валидация password
 
     if not re.match(r'[a-zA-Zа-яёА-ЯЁ]{2,20}', first_name):
         print(f'Not match: {first_name}')
-        return JsonResponse({'result': 'input_error'})
+        return JsonResponse({'error': 'input_error'})
 
     if not re.match(r'[a-zA-Zа-яёА-ЯЁ]{2,20}', last_name):
         print(f'Not match: {last_name}')
-        return JsonResponse({'result': 'input_error'})
+        return JsonResponse({'error': 'input_error'})
 
     if not re.match(r'[a-zA-Z0-9]{3,33}', name):
         print(f'Not match: {name}')
-        return JsonResponse({'result': 'input_error'})
+        return JsonResponse({'error': 'input_error'})
 
     # Валидация about
     # Валидация birthday
@@ -48,7 +48,7 @@ def do_reg(request):
     # 4 Проверка наличия аккаунта
     if User.objects.filter(username=username).exists():
         print(f'Exist: {name}')
-        return JsonResponse({'result': 'exist'})
+        return JsonResponse({'error': 'exist'})
 
     # 5 Регистрация
     user = User.objects.create_user(
@@ -66,4 +66,4 @@ def do_reg(request):
         auth.login(request, aut)
         return JsonResponse({'result': 'ok'})
 
-    return JsonResponse({'result': 'login_error'})
+    return JsonResponse({'error': 'login_error'})
