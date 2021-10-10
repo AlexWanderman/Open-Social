@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.conf.urls import url
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
 from django.contrib import admin
@@ -20,10 +19,10 @@ urlpatterns = [
     path('favicon.ico', RedirectView.as_view(url='/static/img/favicon.ico')),
 
     # debug_page
-    path('', page_debug, name='page_debug'),
+    path('debug_page', page_debug, name='page_debug'),
 
     # app_profile
-    path('usr/', include(profile_urls)),
+    path('', include(profile_urls)),
 
     # app_messages
     path('msg/', include(messages_urls)),

@@ -3,6 +3,8 @@ from django.urls import path, re_path
 from . import views as v
 
 urlpatterns = [
+    path('',         v.landing,  name='landing'),
+
     path('register', v.register, name='register'),
     path('do_reg',   v.do_reg,   name='do_reg'),
 

@@ -1,5 +1,6 @@
 '''Набор страниц и запросов app_profile.'''
 
+from .landing import landing
 from .register import register
 from .profile import profile
 from .profile_link import profile_link
