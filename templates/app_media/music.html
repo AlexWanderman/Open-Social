@@ -1,0 +1,235 @@
+{% extends 'basic.html' %}
+{% load static %}
+
+{% block title %}
+<script src="{% static 'js/upload_file.js' %}"></script>
+<script>
+    async function create_folder() {
+        const url = '{% url "do_create_folder" %}'
+
+        const name = document.querySelector('#name')
+        const about = document.querySelector('#about')
+
+        const data = {
+            'type': 'music',
+            'name': name.value,
+            'about': about.value,
+        }
+
+        const result = await exchange_json(url, data)
+
+        if ('error' in result) {
+            alert(result['error'])
+            return
+        }
+
+        if (result['result'] == 'ok') {
+            const place = document.querySelector('#folders')
+            place.innerHTML += '<li><details onclick="open_folder(' + result['id'] + ')"><summary>' + name.value + ',' + about.value + '</summary><ul id="element_' + result['id'] + '"></ul></details></li>'
+        }
+
+        console.log(result)
+    }
+
+    function upload_music() {
+        const file = document.querySelector('#file')
+        const artist = document.querySelector('#artist')
+        const genre = document.querySelector('#genre')
+        const lyrics = document.querySelector('#lyrics')
+
+        const data = {
+            'type': 'music',
+            'artist': artist.value,
+            'genre': genre.value,
+            'lyrics': lyrics.value,
+        }
+
+        upload_file(
+            '{% url "do_create_file" %}',
+            '{{ csrf_token }}',
+            file.files[0],
+            data,
+        )
+    }
+
+    async function get_folders() {
+        const url = '{% url "do_get_folders" %}'
+
+        const from = 0
+        const upto = 10
+
+        const data = {
+            'type': 'music',
+            'from': from,
+            'upto': upto,
+        }
+
+        const result = await exchange_json(url, data)
+
+        if ('error' in result) {
+            alert(result['error'])
+            return
+        }
+
+        console.log(result)
+        return result
+    }
+
+    async function get_files(folder) {
+        const url = '{% url "do_get_files" %}'
+
+        const from = 0
+        const upto = 10
+
+        const data = {
+            'type': 'music',
+            'folder': folder,
+            'from': from,
+            'upto': upto,
+        }
+
+        const result = await exchange_json(url, data)
+
+        if ('error' in result) {
+            alert(result['error'])
+            return
+        }
+
+        console.log(result)
+        return result
+    }
+
+    let folder_list = []
+    async function open_folder(folder) {
+        if (folder_list.indexOf(folder) != -1) {
+            return
+        }
+
+        folder_list += folder
+
+        const element = document.querySelector('#element_' + folder)
+        const files = await get_files(folder)
+
+        if (files['result'] != 'ok') {
+            alert(files['result'])
+        }
+
+        files['files'].forEach(e => {
+            element.innerHTML += '<li>' + e + '</li>'
+        });
+    }
+</script>
+<title>Музыка</title>
+{% endblock %}
+
+{% block body %}
+<h1>Раздел музыки</h1>
+
+<div>
+    <h3>Поиск музыки</h3>
+    поиск
+</div>
+
+<div>
+    <h3>Мои плейлисты</h3>
+    <!-- Создать папку -->
+    <details>
+        <summary>Создать плейлист</summary>
+        <ul>
+            <li>
+                <label for="name">Название</label>
+                <input type="text" id="name">
+            </li>
+            <li>
+                <label for="about">Описание</label>
+                <input type="text" id="about">
+            </li>
+            <li>
+                <input type="button" value="Создать" onclick="create_folder()">
+            </li>
+        </ul>
+    </details>
+    <!-- Папки -->
+    <ul id="folders"></ul>
+    <div id="load_folders">
+        Загружаю плейлисты...
+        <script>
+            async function c4_1() {
+                const place = document.querySelector('#folders')
+                const result = await get_folders()
+
+                if (result['result'] != 'ok') {
+                    alert(result['result'])
+                }
+
+                result['folders'].forEach(e => {
+                    place.innerHTML += '<li><details onclick="open_folder(' + e[0] + ')"><summary>' + e + '</summary><ul id="element_' + e[0] + '"></ul></details></li>'
+                });
+
+                const block = document.querySelector('#load_folders')
+                block.remove()
+            }
+ 
+            c4_1()
+        </script>
+    </div>
+    <!-- Папки -->
+</div>
+
+<div>
+    <h3>Моя музыка</h3>
+    <details>
+        <summary>Загрузить музыку</summary>
+        <ul>
+            <li>
+                <label for="file">Музыка</label>
+                <input id="file" type="file">
+            </li>
+            <li>
+                <label for="name">Название</label>
+                <input id="name" type="text">
+            </li>
+            <li>
+                <label for="artist">Исполнитель</label>
+                <input id="artist" type="text">
+            </li>
+            <li>
+                <label for="genre">Жанр</label>
+                <input id="genre" type="text">
+            </li>
+            <li>
+                <label for="lyrics">Текст</label>
+                <textarea id="lyrics"></textarea>
+            </li>
+            <li>
+                <input type="button" value="Отправить" onclick="upload_video()">
+            </li>
+        </ul>
+    </details>
+    <!-- Файлы -->
+    <ul id="files"></ul>
+    <div id="load_files">
+        Загружаю музыку...
+        <script>
+            async function c4_2() {
+                const place = document.querySelector('#files')
+                const result = await get_files(null)
+
+                if (result['result'] != 'ok') {
+                    alert(result['result'])
+                }
+
+                result['files'].forEach(e => {
+                    place.innerHTML += '<li>' + e + '</li>'
+                });
+
+                const block = document.querySelector('#load_files')
+                block.remove()
+            }
+
+            c4_2()
+        </script>
+    </div>
+    <!-- Файлы -->
+</div>
+{% endblock %}

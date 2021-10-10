@@ -1,0 +1,41 @@
+{% extends 'basic.html' %}
+
+{% block title %}
+<script>
+    // Вход в аккаунт
+    async function login() {
+        const url = '{% url "do_in" %}'
+        const data = {
+            'username': document.getElementById('username').value,
+            'password': document.getElementById('password').value,
+        }
+
+        const result = await exchange_json(url, data)
+
+        if ('error' in result) {
+            alert(result['error'])
+            return
+        }
+
+        console.log(result)
+    }
+</script>
+<title>Вход</title>
+{% endblock %}
+
+{% block body %}
+<h1>Страница входа</h1>
+<div>
+    <p>
+        <label for="username">Логин</label><br>
+        <input id="username" type="text">
+    </p>
+    <p>
+        <label for="password">Пароль</label><br>
+        <input id="password" type="password">
+    </p>
+    <p>
+        <button id="submit" onclick="login()">Войти</button>
+    </p>
+</div>
+{% endblock %}

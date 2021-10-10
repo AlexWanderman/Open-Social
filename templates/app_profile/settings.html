@@ -1,0 +1,55 @@
+{% extends 'basic.html' %}
+
+{% block title %}
+<script>
+    async function do_setup(data) {
+        const url = '{% url "do_setup" %}'
+        const result = await exchange_json(url, data)
+
+        if ('error' in result) {
+            alert(result['error'])
+            return
+        }
+
+        console.log(result)
+    }
+
+    async function change_password() {
+        const ps_1 = document.querySelector('#ps_1')
+        const ps_2 = document.querySelector('#ps_2')
+        const ps_3 = document.querySelector('#ps_3')
+        const data = {
+            'action': 'change_password',
+            'ps_1': ps_1.value,
+            'ps_2': ps_2.value,
+            'ps_3': ps_3.value,
+        }
+        do_setup(data)
+    }
+</script>
+<title>Настройки</title>
+{% endblock %}
+
+{% block body %}
+<h1>Настройки</h1>
+<h3>Сменить пароль</h3>
+<div>
+    <ul>
+        <li>
+            <label for="ps_1">Старый пароль</label>
+            <input id="ps_1" type="password">
+        </li>
+        <li>
+            <label for="ps_2">Новый пароль</label>
+            <input id="ps_2" type="password">
+        </li>
+        <li>
+            <label for="ps_3">Подтверждение пароля</label>
+            <input id="ps_3" type="password">
+        </li>
+        <li>
+            <input type="button" value="Сохранить" onclick="change_password()">
+        </li>
+    </ul>
+</div>
+{% endblock %}

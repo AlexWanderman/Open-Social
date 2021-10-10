@@ -1,0 +1,29 @@
+{% extends 'basic.html' %}
+
+{% block title %}
+<script>
+    async function do_inv() {
+        const url = '{% url "do_inv" %}'
+        const data = {
+            'link': '{{ link }}',
+        }
+
+        const result = await exchange_json(url, data)
+
+        if ('error' in result) {
+            alert(result['error'])
+            return
+        }
+
+        console.log(result)
+    }
+</script>
+<title>Приглашение</title>
+{% endblock %}
+
+{% block body %}
+<h1>Приглашение в {{ name }}</h1>
+<h3>Owner = {{ owner }}</h3>
+<div>About: {{ about }}</div>
+<input type="button" value="Вступить" onclick="do_inv()">
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'basic.html' %}
+
+{% block title %}
+<script>
+    const soket = new WebSocket('ws://' + window.location.host + '/ws/messages/{{ id }}/')
+
+    function send_msg() {
+        const text = document.querySelector('#text')
+        const message = text.value
+        soket.send(JSON.stringify({
+            'id': '{{ id }}',
+            'text': message,
+        }))
+    }
+
+    soket.onmessage = function(e) {
+        const data = JSON.parse(e.data)
+        console.log(data)
+
+        if (data['message']) {
+            const message_log = document.querySelector('#message_log')
+            message_log.innerHTML += '<li>' + data['name'] + ' - ' + data['datetime'] + ': ' + data['message'] + '</li>'
+        }
+    }
+
+    async function do_manage(action, link=null) {
+        const url = '{% url "do_manage" %}'
+
+        const data = {
+            'id': '{{ id }}',
+            'action': action,
+            'link': link,
+        }
+
+        const result = await exchange_json(url, data)
+
+        if ('error' in result) {
+            alert(result['error'])
+            return
+        }
+
+        console.log(result)
+    }
+</script>
+<title>Название чата</title>
+{% endblock %}
+
+{% block body %}
+<h1>Страница чата</h1>
+<h3>id = {{ id }} type = {{ type }}</h3>
+<div>
+    <input id="text" type="text" placeholder="Сообщение от лица {{ request.user }}">
+    <input id="submit" type="button" onclick="send_msg()" value="Отправить">
+</div>
+<details>
+    <summary>Ссылки для приглашения</summary>
+    <ul>
+        <li><input type="button" value="Создать новую" onclick="do_manage('create')"></li>
+        {% for i in invites %}
+        <li>
+            <a href="{% url 'invite' i.link %}">{% url 'invite' i.link %}</a>
+            <input type="button" value="Удалить" onclick="do_manage('delete', '{{ i.id }}')">
+        </li>
+        {% endfor %}
+    </ul>
+</details>
+<ul id="message_log">
+    {% for m in messages %}
+    <li>{{ m.streamer.user.name }} - {{ m.datetime }}: {{ m.text }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

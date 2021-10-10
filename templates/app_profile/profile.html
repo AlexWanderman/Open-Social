@@ -1,0 +1,21 @@
+{% extends 'basic.html' %}
+
+{% block title %}
+<title>Профиль</title>
+{% endblock %}
+
+{% block body %}
+<h1>Страница профиля</h1>
+<div>
+    {% if is_you %}
+    <p>Ваш профиль</p>
+    {% else %}
+    <p>Чужой профиль</p>
+    {% endif %}
+    <p>Имя: {{ request.user.first_name }}</p>
+    <p>Фамилия: {{ request.user.last_name }}</p>
+    <p>Ссылка: {{ request.user.name }}</p>
+    <p>О себе: {{ request.user.about }}</p>
+    <p>Дата рождения: {{ request.user.birthday }}</p>
+</div>
+{% endblock %}

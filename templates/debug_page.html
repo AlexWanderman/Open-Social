@@ -1,0 +1,56 @@
+{% extends 'basic.html' %}
+
+{% block title %}
+<title>Отладка</title>
+{% endblock %}
+
+{% block body %}
+<h1>Страница отладки</h1>
+<h2>app_profile</h2>
+<ul>
+    <li><a href="{% url 'register' %}">Регистрация</a></li>
+    <li><a href="{% url 'login' %}">Вход</a></li>
+    <li><a href="{% url 'profile' %}">Свой профиль</a></li>
+    <li><a href="{% url 'settings' %}">Настройки</a></li>
+    <li>
+        {% url 'profile' %}/
+        <input id="link1" type="text">
+        <input
+            type="button"
+            onclick="document.location.href = '{% url 'profile' %}/' + document.querySelector('#link1').value"
+            value="Профиль"
+        >
+    </li>
+</ul>
+<h2>app_messages</h2>
+<ul>
+    <li><a href="{% url 'all' %}">Список бесед</a></li>
+    <li><a href="{% url 'stream' 1 %}">Тестовая беседа</a></li>
+    <li>
+        /msg/id=
+        <input id="link2" type="text">
+        <input
+            type="button"
+            onclick="document.location.href = 'msg/id=' + document.querySelector('#link2').value"
+            value="Беседа"
+        >
+    </li>
+    <li>
+        /msg/in=
+        <input id="link2" type="text">
+        <input
+            type="button"
+            onclick="document.location.href = 'msg/in=' + document.querySelector('#link2').value"
+            value="Приглашение"
+        >
+    </li>
+</ul>
+<h2>app_media</h2>
+<ul>
+    <li><a href="{% url 'images' %}">Раздел изображений</a></li>
+    <li><a href="{% url 'videos' %}">Раздел видео</a></li>
+    <li><a href="{% url 'music' %}">Раздел музыки</a></li>
+    <li><a href="{% url 'podcasts' %}">Раздел подкастов</a></li>
+    <li><a href="{% url 'documents' %}">Раздел документов</a></li>
+</ul>
+{% endblock %}

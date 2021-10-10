@@ -1,0 +1,62 @@
+{% extends 'basic.html' %}
+
+{% block title %}
+<script>
+    async function do_create() {
+        const url = '{% url "do_create" %}'
+
+        const type = document.querySelector('#type')
+        const name = document.querySelector('#name')
+        const about = document.querySelector('#about')
+
+        const data = {
+            'type': type.value,
+            'name': name.value,
+            'about': about.value,
+        }
+
+        const result = await exchange_json(url, data)
+
+        if ('error' in result) {
+            alert(result['error'])
+            return
+        }
+
+        console.log(result)
+    }
+</script>
+<title>Общение</title>
+{% endblock %}
+
+{% block body %}
+<h1>Страница с беседами</h1>
+<details>
+    <summary>Создать беседу</summary>
+    <ul>
+        <li>
+            <label for="type">type</label>
+            <input id="type" type="text">
+        </li>
+        <li>
+            <label for="name">name</label>
+            <input id="name" type="text">
+        </li>
+        <li>
+            <label for="about">about</label>
+            <input id="about" type="text">
+        </li>
+        <li>
+            <input type="button" onclick="do_create()" value="Создать">
+        </li>
+    </ul>
+</details>
+{% if chats %}
+<ul>
+    {% for c in chats %}
+    <li>id = {{ c.stream.id }}; type = {{ c.stream.type }}; owner = {{ c.stream.owner }}; <a href="{% url 'stream' c.stream.id %}">ссылка</a>;</li>
+    {% endfor %}
+</ul>
+{% else %}
+Тут ничего не нашлось.
+{% endif %}
+{% endblock %}
