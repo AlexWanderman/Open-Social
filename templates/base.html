@@ -1,0 +1,112 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/base_grid.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/base_style.css' %}">
+    <script src="{% static 'js/exchange_json.js' %}"></script>
+    <script src="{% static 'js/upload_file.js' %}"></script>
+    <script>
+        let CURRENT_WINDOW_ID = ''
+        async function open_window(id) {
+            CURRENT_WINDOW_ID = '#' + id
+            const window_bg = document.querySelector(CURRENT_WINDOW_ID)
+            window_bg.style.display = 'block'
+        }
+
+        async function close_window() {
+            const window_bg = document.querySelector(CURRENT_WINDOW_ID)
+            window_bg.style.display = 'none'
+        }
+    </script>
+    {% block head %}{% endblock %}
+</head>
+<body class="container">
+
+    <!-- Навигация -->
+    <div class="top menu">
+
+        <!-- Разделы сайта -->
+        <a class="menu_item" id="menu_item_1" href="{% url 'all' %}">Общение</a>
+        <a class="menu_item" id="menu_item_2" href="{% url 'images' %}">Фото</a>
+        <a class="menu_item" id="menu_item_3" href="{% url 'videos' %}">Видео</a>
+        <a class="menu_item" id="menu_item_4" href="{% url 'music' %}">Музыка</a>
+        <a class="menu_item" id="menu_item_5" href="{% url 'podcasts' %}">Подкасты</a>
+        <a class="menu_item" id="menu_item_6" href="{% url 'documents' %}">Документы</a>
+
+        <!-- Профиль, настройки и выход -->
+        <span class="menu_dropdown">
+            <span class="menu_name">{{ request.user }}</span>
+            <span class="menu_droplist">
+                <a class="menu_dropitem" href="{% url 'profile' %}">Профиль</a>
+                <a class="menu_dropitem" href="{% url 'settings' %}">Настройки</a>
+                <a class="menu_dropitem" href="#">Выход...</a>
+            </span>
+        </span>
+
+    </div>
+
+    <div class="left"><!-- left space --></div>
+
+    <!-- Основная информация -->
+    <div class="center">
+
+        <!-- Папки -->
+        <div>
+            <div class="title_container">
+                <span class="title">{% block folder_title %}{% endblock %}</span>
+                <input class="title_button" type="button" value="Создать" onclick="open_window('w_create_folder')">
+                <input class="title_button" type="button" value="Изменить">
+                <input class="title_button" type="button" value="Удалить">
+            </div>
+            <div class="folders" id="folders">
+                <script>get_folders()</script>
+            </div>
+        </div>
+
+        <!-- Файлы папки -->
+        <div id="folder_file_container" style="display: none;">
+            <div class="title_container">
+                <span class="title" id="folder_title"></span>
+                <input class="title_button" type="button" value="X Закрыть" onclick="close_folder()">
+                <input class="title_button" type="button" value="Создать">
+                <input class="title_button" type="button" value="Изменить">
+                <input class="title_button" type="button" value="Удалить">
+            </div>
+            <div id="folder_about"></div>
+            <div class="files" id="folder_files"></div>
+        </div>
+
+        <!-- Файлы -->
+        <div id="file_container">
+            <div class="title_container">
+                <span class="title">{% block file_title %}{% endblock %}</span>
+                <input class="title_button" type="button" value="Создать" onclick="open_window('w_create_file')">
+                <input class="title_button" type="button" value="Изменить">
+                <input class="title_button" type="button" value="Удалить">
+            </div>
+            <div class="files" id="files">
+                <script>get_files('files', null)</script>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="right"><!-- right space --></div>
+
+    <!-- Дополнительная информация -->
+    <div class="bottom footer">
+        <a class="footer_link" target="_blank" href="https://github.com/AlexWanderman/Open-Social">Проект на Github</a>
+        <a class="footer_link" target="_blank" href="https://github.com/AlexWanderman">AlexWanderman</a>
+        <a class="footer_link" href="#">Подробнее о сайте</a>
+        <a class="footer_link" href="#">Отзывы и предложения</a>
+    </div>
+
+    <!-- Полноэкранные окна -->
+    {% block popup_windows %}{% endblock %}
+
+</body>
+</html>

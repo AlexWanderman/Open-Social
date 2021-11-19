@@ -155,7 +155,7 @@ def do_get_files(request):
     print(obj)
 
     if 'type' not in obj or obj['type'] not in TYPED_FILE:
-        return JsonResponse({'error': 'wrong type'})
+        return JsonResponse({'status': 'wrong type'})
 
     user = request.user
     folder = obj['folder'] or None
@@ -163,8 +163,15 @@ def do_get_files(request):
     files = type.objects.filter(file__user=user, file__folder__id=folder)
 
     data = {
-        'result': 'ok',
-        'files': [[str(f.file.user), str(f.file.name)] for f in files],
+        'status': 'ok',
+        'files': [
+            [
+                str(f.file.id),
+                str(f.file.file.url),
+                str(f.file.user),
+                str(f.file.name),
+            ]
+            for f in files],
     }
 
     return JsonResponse(data)

@@ -1,36 +1,138 @@
-{% extends 'basic.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}
-<script src="{% static 'js/upload_file.js' %}"></script>
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/image_style.css' %}">
+<style>
+    #menu_item_2 {
+        background: none;
+        color: var(--color-accent);
+        border: 2px solid;
+        padding: 4px;
+    }
+</style>
 <script>
+    function open_folder(id, title, owner, about) {
+        const file_container = document.querySelector('#file_container')
+        file_container.style.display = 'none'
+
+        const folder_title = document.querySelector('#folder_title')
+        folder_title.innerText = title
+
+        const folder_about = document.querySelector('#folder_about')
+        folder_about.innerText = about
+
+        const folder_files = document.querySelector('#folder_files')
+        folder_files.innerHTML = ''
+        get_files('folder_files', id)
+
+        const folder_file_container = document.querySelector('#folder_file_container')
+        folder_file_container.style.display = 'block'
+    }
+
+    function close_folder() {
+        const folder_file_container = document.querySelector('#folder_file_container')
+        folder_file_container.style.display = 'none'
+
+        const file_container = document.querySelector('#file_container')
+        file_container.style.display = 'block'
+    }
+</script>
+<script> // Разместить папку на странице
+    function insert_folder(id, title, owner, about) {
+        const s = document.createElement('div')
+        s.classList = 'folder'
+        s.onclick = () => { open_folder(id, title, owner, about) }
+
+        const d1 = document.createElement('span')
+        d1.classList = 'folder_title'
+        d1.innerText = title
+        s.appendChild(d1)
+
+        const d2 = document.createElement('span')
+        d2.classList = 'folder_owner'
+        d2.innerText = owner
+        s.appendChild(d2)
+
+        const place = document.querySelector('#folders')
+        place.appendChild(s)
+    }
+</script>
+<script> // Создать папку
     async function create_folder() {
-        const url = '{% url "do_create_folder" %}'
+        const type = 'image'
+        const name = document.querySelector('#w_folder_name')
+        const about = document.querySelector('#w_folder_about')
 
-        const name = document.querySelector('#name')
-        const about = document.querySelector('#about')
+        const result = await exchange_json(
+            '{% url "do_create_folder" %}',
+            {'type': type, 'name': name.value, 'about': about.value},
+            '{{ csrf_token }}',
+        )
+        console.log(result)
 
-        const data = {
-            'type': 'image',
-            'name': name.value,
-            'about': about.value,
-        }
-
-        const result = await exchange_json(url, data)
-
-        if ('error' in result) {
-            alert(result['error'])
+        if (result['status'] != 'ok') {
+            alert(result['status'])
             return
         }
 
-        if (result['result'] == 'ok') {
-            const place = document.querySelector('#folders')
-            place.innerHTML += '<li><details onclick="open_folder(' + result['id'] + ')"><summary>' + name.value + ',' + about.value + '</summary><ul id="element_' + result['id'] + '"></ul></details></li>'
+        insert_folder(result['id'], name.value, '{{ request.user }}', about.value)
+    }
+</script>
+<script> // Загрузить следующую порцию папок
+    let CURRENT_FOLDER_PAGE = 0
+    let FOLDER_SIZE = 10
+    async function get_folders() {
+        const type = 'image'
+        const page = CURRENT_FOLDER_PAGE
+        const size = FOLDER_SIZE
+
+        const result = await exchange_json(
+            '{% url "do_get_folders" %}',
+            {'type': type, 'page': page, 'size': size},
+            '{{ csrf_token }}',
+        )
+        console.log(result)
+
+        if (result['status'] != 'ok') {
+            alert(result['status'])
+            return
         }
 
-        console.log(result)
-    }
+        const place = document.querySelector('#folders')
+        result['folders'].forEach(e => {
+            insert_folder(e[0], e[2], e[1], e[3])
+        })
 
+        CURRENT_FOLDER_PAGE += 1
+    }
+</script>
+<script> // Разместить изображение на странице
+    function insert_file(where, id, title, owner, url) {
+        const s = document.createElement('span')
+        s.classList = 'image'
+
+        const d1 = document.createElement('div')
+        d1.classList = 'image_title'
+        d1.innerText = title
+        s.appendChild(d1)
+
+        const d2 = document.createElement('div')
+        d2.classList = 'image_owner'
+        d2.innerText = owner
+        s.appendChild(d2)
+
+        const d3 = document.createElement('img')
+        d3.classList = 'image_img'
+        d3.src = url
+        d3.alt = title
+        s.appendChild(d3)
+
+        const place = document.querySelector('#'+where)
+        place.appendChild(s)
+    }
+</script>
+<script> // Создать новое изображение
     function upload_image() {
         const file = document.querySelector('#file')
         const name = document.querySelector('#name')
@@ -49,178 +151,82 @@
             data,
         )
     }
+</script>
+<script> // Загрузить следующую порцию файлов
+    async function get_files(where, folder) {
+        const type = 'image'
+        const page = 0
+        const size = 10
 
-    async function get_folders() {
-        const url = '{% url "do_get_folders" %}'
-
-        const from = 0
-        const upto = 10
-
-        const data = {
-            'type': 'image',
-            'from': from,
-            'upto': upto,
-        }
-
-        const result = await exchange_json(url, data)
-
-        if ('error' in result) {
-            alert(result['error'])
-            return
-        }
-
+        const result = await exchange_json(
+            '{% url "do_get_files" %}',
+            {'type': type, 'folder': folder, 'page': page, 'size': size},
+            '{{ csrf_token }}',
+        )
         console.log(result)
-        return result
-    }
 
-    async function get_files(folder) {
-        const url = '{% url "do_get_files" %}'
-
-        const from = 0
-        const upto = 10
-
-        const data = {
-            'type': 'image',
-            'folder': folder,
-            'from': from,
-            'upto': upto,
-        }
-
-        const result = await exchange_json(url, data)
-
-        if ('error' in result) {
-            alert(result['error'])
+        if (result['status'] != 'ok') {
+            alert(result['status'])
             return
         }
 
-        console.log(result)
-        return result
-    }
-
-    let folder_list = []
-    async function open_folder(folder) {
-        if (folder_list.indexOf(folder) != -1) {
-            return
-        }
-
-        folder_list += folder
-
-        const element = document.querySelector('#element_' + folder)
-        const files = await get_files(folder)
-
-        if (files['result'] != 'ok') {
-            alert(files['result'])
-        }
-
-        files['files'].forEach(e => {
-            element.innerHTML += '<li>' + e + '</li>'
-        });
+        const place = document.querySelector('#files')
+        result['files'].forEach(e => {
+            insert_file(where, e[0], e[3], e[2], e[1])
+        })
     }
 </script>
 <title>Изображения</title>
 {% endblock %}
 
-{% block body %}
-<h1>Раздел изображений</h1>
+{% block folder_title %}Альбомы{% endblock %}
 
-<div>
-    <h3>Поиск изображений</h3>
-    поиск
-</div>
+{% block file_title %}Фото{% endblock %}
 
-<div>
-    <h3>Мои альбомы</h3>
-    <!-- Создать папку -->
-    <details>
-        <summary>Создать альбом</summary>
-        <ul>
-            <li>
-                <label for="name">Название</label>
-                <input type="text" id="name">
-            </li>
-            <li>
-                <label for="about">Описание</label>
-                <input type="text" id="about">
-            </li>
-            <li>
-                <input type="button" value="Создать" onclick="create_folder()">
-            </li>
-        </ul>
-    </details>
-    <!-- Папки -->
-    <ul id="folders"></ul>
-    <div id="load_folders">
-        Загружаю альбомы...
-        <script>
-            async function c4_1() {
-                const place = document.querySelector('#folders')
-                const result = await get_folders()
+{% block popup_windows %}
 
-                if (result['result'] != 'ok') {
-                    alert(result['result'])
-                }
-
-                result['folders'].forEach(e => {
-                    place.innerHTML += '<li><details onclick="open_folder(' + e[0] + ')"><summary>' + e + '</summary><ul id="element_' + e[0] + '"></ul></details></li>'
-                });
-
-                const block = document.querySelector('#load_folders')
-                block.remove()
-            }
- 
-            c4_1()
-        </script>
+<!-- Окно меню -->
+<div class="window_bg" id="w_create_folder">
+    <div class="window">
+        <!-- Внутри окна -->
+        <div>Создать альбом</div>
+        <div>
+            <div><label>Название</label></div>
+            <div><input id="w_folder_name" type="text"></div>
+        </div>
+        <div>
+            <div><label>Описание</label></div>
+            <div><textarea id="w_folder_about"></textarea></div>
+        </div>
+        <div>
+            <input type="button" value="Отмена" onclick="close_window()">
+            <input type="button" value="Создать" onclick="create_folder()">
+        </div>
     </div>
-    <!-- Папки -->
 </div>
 
-<div>
-    <h3>Мои изображения</h3>
-    <!-- Создать файл -->
-    <details>
-        <summary>Загрузить изображение</summary>
-        <ul>
-            <li>
-                <label for="file">Изображение</label>
-                <input id="file" type="file">
-            </li>
-            <li>
-                <label for="name">Название</label>
-                <input id="name" type="text">
-            </li>
-            <li>
-                <label for="about">Описание</label>
-                <textarea id="about"></textarea>
-            </li>
-            <li>
-                <input type="button" value="Отправить" onclick="upload_image()">
-            </li>
-        </ul>
-    </details>
-    <!-- Файлы -->
-    <ul id="files"></ul>
-    <div id="load_files">
-        Загружаю изображения...
-        <script>
-            async function c4_2() {
-                const place = document.querySelector('#files')
-                const result = await get_files(null)
-
-                if (result['result'] != 'ok') {
-                    alert(result['result'])
-                }
-
-                result['files'].forEach(e => {
-                    place.innerHTML += '<li>' + e + '</li>'
-                });
-
-                const block = document.querySelector('#load_files')
-                block.remove()
-            }
-
-            c4_2()
-        </script>
+<!-- Окно меню -->
+<div class="window_bg" id="w_create_file">
+    <div class="window">
+        <!-- Внутри окна -->
+        <div>Загрузить фото</div>
+        <div>
+            <div><label>Название</label></div>
+            <div><input type="text"></div>
+        </div>
+        <div>
+            <div><label>Описание</label></div>
+            <div><textarea></textarea></div>
+        </div>
+        <div>
+            <div><label for="">Фото</label></div>
+            <div><input type="file"></div>
+        </div>
+        <div>
+            <input type="button" value="Отмена" onclick="close_window()">
+            <input type="button" value="Создать">
+        </div>
     </div>
-    <!-- Файлы -->
 </div>
+
 {% endblock %}

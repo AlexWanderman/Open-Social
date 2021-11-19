@@ -1,0 +1,27 @@
+.image {
+    display: inline-block;
+    margin: 4px;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    width: 200px;
+    height: 200px;
+}
+
+.image_title {
+
+}
+
+.image_owner {
+
+}
+
+.image_img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+}
